@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>绘制一个点</title>
+    <title>使用attribute变量</title>
     <script src="../lib/initShaders.js"></script>
   </head>
   <style>
@@ -26,9 +26,11 @@
     const gl = canvas.getContext("webgl");
     // 创建顶点着色器源码
     const VERTEX_SHADER_SOURCE = `
-        void main() {
-            gl_Position = vec4(0.0,0.0,0.0, 1.0);
-            gl_PointSize = 10.0;
+        attribute vec4 aPosition;
+        attribute float aPointSize;    
+    void main() {
+            gl_Position = aPosition;
+            gl_PointSize = aPointSize;
         }
     `;
     // 创建片元着色器源码
@@ -38,8 +40,22 @@
         }
     `;
 
-    initShaders(VERTEX_SHADER_SOURCE, FRAG_SHADER_SOURCE, gl);
+    const program = initShaders(VERTEX_SHADER_SOURCE, FRAG_SHADER_SOURCE, gl);
+    const aPosition = gl.getAttribLocation(program, "aPosition");
+    const aPointSize = gl.getAttribLocation(program, "aPointSize");
+    gl.vertexAttrib4f(aPosition, 0.5, 0.5, 0.0, 1.0);
 
-    gl.drawArrays(gl.POINT, 0, 1);
+    let pointSize = 1.0;
+
+    function animation() {
+      if (pointSize > 20) {
+        pointSize = 1.0;
+      }
+      pointSize += 1;
+      gl.vertexAttrib1f(aPointSize, pointSize);
+      gl.drawArrays(gl.POINT, 0, 1);
+      requestAnimationFrame(animation);
+    }
+    animation();
   </script>
 </html>

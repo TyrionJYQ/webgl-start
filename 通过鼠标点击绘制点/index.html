@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>使用attribute变量</title>
+    <script src="../lib/initShaders.js"></script>
+  </head>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    #canvas {
+      background-color: yellow;
+    }
+  </style>
+  <body>
+    <canvas id="canvas" height="400" width="400">
+      你的浏览器不支持canvas
+    </canvas>
+  </body>
+  <script>
+    const canvas = document.querySelector("#canvas");
+    const gl = canvas.getContext("webgl");
+    // 创建顶点着色器源码
+    const VERTEX_SHADER_SOURCE = `
+        attribute vec4 aPosition;
+        // attribute float aPointSize = 10.0;    
+    void main() {
+            gl_Position = aPosition;
+            gl_PointSize = 10.0;
+        }
+    `;
+    // 创建片元着色器源码
+    const FRAG_SHADER_SOURCE = `
+        void main() {
+          gl_FragColor=vec4(0.0,0.0,1.0,1.0);
+        }
+    `;
+
+    const program = initShaders(VERTEX_SHADER_SOURCE, FRAG_SHADER_SOURCE, gl);
+    const aPosition = gl.getAttribLocation(program, "aPosition");
+    canvas.onclick = function (ev) {
+      click(ev, gl, canvas, aPosition);
+    };
+    let points = [];
+    function click(ev, gl, canvas, aPosition) {
+      let x = ev.clientX;
+      let y = ev.clientY;
+      let rect = ev.target.getBoundingClientRect();
+      x = (x - rect.left - canvas.width / 2) / (canvas.width / 2);
+      y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
+      points.push({ x, y });
+      let len = points.length;
+      console.log(points);
+      for (let i = 0; i < len; i++) {
+        gl.vertexAttrib2f(aPosition, points[i].x, points[i].y);
+        gl.drawArrays(gl.POINT, 0, 1);
+      }
+    }
+  </script>
+</html>
