@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>使用attribute变量</title>
+    <script src="../lib/initShaders.js"></script>
+  </head>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    #canvas {
+      background-color: yellow;
+    }
+  </style>
+  <body>
+    <canvas id="canvas" height="400" width="400">
+      你的浏览器不支持canvas
+    </canvas>
+  </body>
+  <script>
+    const canvas = document.querySelector("#canvas");
+    const gl = canvas.getContext("webgl");
+    // 创建顶点着色器源码
+    const VERTEX_SHADER_SOURCE = `
+        attribute vec4 aPosition;
+        varying vec4 vColor;
+        void main() {
+            vColor = aPosition;
+            gl_Position = aPosition;
+        }
+    `;
+    // 创建片元着色器源码
+    const FRAG_SHADER_SOURCE = `
+        precision lowp float ;
+        varying vec4 vColor;
+        void main() {
+          gl_FragColor=vColor;
+        }
+    `;
+
+    const program = initShaders(VERTEX_SHADER_SOURCE, FRAG_SHADER_SOURCE, gl);
+    const aPosition = gl.getAttribLocation(program, "aPosition");
+    const points = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]);
+    // 创建缓冲区对象
+    const vertexBuffer = gl.createBuffer();
+
+    // 将缓冲区对象绑定到目标
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+    // 向缓冲区中写入数据
+    gl.bufferData(gl.ARRAY_BUFFER, points, gl.STATIC_DRAW);
+
+    // 将缓冲区对象分配给attribute变量
+    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+
+    // 激活缓冲区对象
+    gl.enableVertexAttribArray(aPosition);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  </script>
+</html>
